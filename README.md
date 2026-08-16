@@ -115,9 +115,17 @@ Document review
 <img width="1909" height="901" alt="Screenshot 2026-08-15 213017" src="https://github.com/user-attachments/assets/83eb6739-40ee-4214-a692-f96ba86bfa00" />
 
 
+Prescription Queue
 <img width="1906" height="903" alt="Screenshot 2026-08-15 213026" src="https://github.com/user-attachments/assets/b023b86c-de4a-453e-a60a-6737aa51ce1e" />
 
 
+Canonical OCR evidence
+<img width="1910" height="866" alt="Screenshot 2026-08-15 213040" src="https://github.com/user-attachments/assets/9a10d644-9068-4e36-a628-bfe5b0e20aed" />
 
 
+Prescribed medicines and remidies
+<img width="1787" height="691" alt="Screenshot 2026-08-15 213051" src="https://github.com/user-attachments/assets/d02ca790-7141-4ed7-ae09-73f9a90fc2e9" />
 
+
+Export structured JSON
+<img width="1787" height="691" alt="Screenshot 2026-08-15 213051" src="https://github.com/user-attachments/assets/e51d7749-53db-49bb-8452-d8e061ec935d" />
