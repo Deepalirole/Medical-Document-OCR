@@ -109,10 +109,15 @@ See [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) for verified progress a
 limitations.
 
 
-
-
 Outputs:-
+
+Document review
 <img width="1909" height="901" alt="Screenshot 2026-08-15 213017" src="https://github.com/user-attachments/assets/83eb6739-40ee-4214-a692-f96ba86bfa00" />
+
+
+<img width="1906" height="903" alt="Screenshot 2026-08-15 213026" src="https://github.com/user-attachments/assets/b023b86c-de4a-453e-a60a-6737aa51ce1e" />
+
+
 
 
 
