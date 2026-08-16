@@ -107,3 +107,12 @@ failed LLM extraction leaves raw evidence plus null review fields available for 
 
 See [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) for verified progress and environment
 limitations.
+
+
+
+
+Outputs:-
+<img width="1909" height="901" alt="Screenshot 2026-08-15 213017" src="https://github.com/user-attachments/assets/83eb6739-40ee-4214-a692-f96ba86bfa00" />
+
+
+
