@@ -30,10 +30,15 @@ Tabular extraction structure mapped to schemas with atomic evidence tracking, do
 
 ![Prescribed Medicines & Remedies Table](docs/images/04-medicines-table.png)
 
-### 5. Structured JSON Export
-Direct JSON export and inspection modal displaying mapped fields ready for downstream HMIS / EMR consumption.
+### 5. Structured JSON & Excel Export
+Direct JSON and formatted Excel (.xlsx) export and inspection modal displaying mapped fields ready for downstream HMIS / EMR consumption.
 
 ![Structured JSON Export](docs/images/05-export-json.png)
+
+### 6. Dynamic Document & Bill Schema Registry
+Organization schema registry enabling live configuration and template switching between clinical prescriptions and medical bills / pharmacy receipts.
+
+![Dynamic Document & Bill Schema Registry](docs/images/06-schema-registry.png)
 
 ## Architecture
 
