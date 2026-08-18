@@ -1,6 +1,7 @@
 from typing import Any
 from uuid import UUID
 
+from app.core.errors import AppError
 from app.repositories.supabase.client import SupabaseAdminClient
 
 
@@ -133,7 +134,15 @@ class SupabaseProcessingRepository:
         return rows[0] if rows else None
 
     async def create_extraction_run(self, data: dict[str, Any]) -> dict[str, Any]:
-        return await self._insert("extraction_runs", data)
+        try:
+            return await self._insert("extraction_runs", data)
+        except AppError as err:
+            if "prompt_sha256" in err.message or "prompt_version" in err.message or "PGRST204" in err.message:
+                fallback_data = {
+                    k: v for k, v in data.items() if k not in ("prompt_version", "prompt_sha256")
+                }
+                return await self._insert("extraction_runs", fallback_data)
+            raise
 
     async def create_fields(self, fields: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if not fields:
