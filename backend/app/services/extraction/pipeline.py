@@ -81,6 +81,7 @@ class ExtractionService:
                     "structured_output": extraction.structured_output,
                     "status": "REVIEW_REQUIRED" if not validation.valid else "COMPLETED",
                     "processing_ms": extraction.processing_ms,
+                    **self._prompt_identity(),
                 }
             )
             await self._persist_fields(organization_id, prescription_id, schema_id, fields)
@@ -121,6 +122,7 @@ class ExtractionService:
                     "status": "FAILED",
                     "processing_ms": 0,
                     "error_code": error.code,
+                    **self._prompt_identity(),
                 }
             )
             await self._persist_fields(organization_id, prescription_id, schema_id, fields)
@@ -139,6 +141,17 @@ class ExtractionService:
                 "status": "LLM_FAILED",
                 "warnings": [{"path": "", "code": error.code}],
             }
+
+    def _prompt_identity(self) -> dict[str, Any]:
+        """Pin the exact prompt an extraction ran under, when the provider exposes one.
+
+        Providers that carry no versioned prompt record nulls rather than a guess, so the
+        column never claims a lineage that does not exist.
+        """
+        return {
+            "prompt_version": getattr(self.provider, "prompt_version", None),
+            "prompt_sha256": getattr(self.provider, "prompt_sha256", None),
+        }
 
     async def _persist_fields(
         self, organization_id: UUID, prescription_id: UUID, schema_id: UUID, fields

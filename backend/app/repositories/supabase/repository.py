@@ -222,6 +222,54 @@ class SupabaseRepository:
             params["created_at"] = f"lt.{created_before}"
         return await self.client.request("GET", "prescriptions", params=params)
 
+    async def approval_workflow(self, organization_id: UUID) -> dict[str, Any] | None:
+        rows = await self.client.request(
+            "GET",
+            "approval_workflows",
+            params={"organization_id": f"eq.{organization_id}", "limit": "1"},
+        )
+        return rows[0] if rows else None
+
+    async def approval_steps(self, prescription_id: UUID) -> list[dict[str, Any]]:
+        return await self.client.request(
+            "GET",
+            "prescription_approval_steps",
+            params={
+                "prescription_id": f"eq.{prescription_id}",
+                "order": "stage_order.asc,created_at.asc",
+            },
+        )
+
+    async def record_approval_step(self, data: dict[str, Any]) -> dict[str, Any]:
+        rows = await self.client.request(
+            "POST",
+            "prescription_approval_steps",
+            json=data,
+            extra_headers={"Prefer": "return=representation"},
+        )
+        return rows[0] if rows else data
+
+    async def corrections_for_prescriptions(
+        self, prescription_ids: list[UUID]
+    ) -> list[dict[str, Any]]:
+        """Correction counts for the feedback dataset.
+
+        ``corrected_by`` is deliberately excluded from the projection so reviewer identity
+        never leaves the database through this path.
+        """
+        if not prescription_ids:
+            return []
+        joined = ",".join(str(prescription_id) for prescription_id in prescription_ids)
+        return await self.client.request(
+            "GET",
+            "corrections",
+            params={
+                "prescription_id": f"in.({joined})",
+                "select": "id,prescription_id,prescription_field_id,created_at",
+                "order": "created_at.asc",
+            },
+        )
+
     async def organization_metrics(self, organization_id: UUID) -> dict[str, Any]:
         row = await self.client.request(
             "POST",

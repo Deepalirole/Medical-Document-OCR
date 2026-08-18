@@ -125,4 +125,15 @@ export const api = {
     request<PrescriptionSchema>(`/api/prescription-schemas/${schemaId}/activate`, { method: 'POST' }),
   deleteSchema: (schemaId: string) =>
     request<void>(`/api/prescription-schemas/${schemaId}`, { method: 'DELETE' }),
+  exportExcelBlob: async (prescriptionId: string): Promise<Blob> => {
+    const { data } = await supabase.auth.getSession()
+    const accessToken = data.session?.access_token
+    const response = await fetch(`${apiBaseUrl}/api/prescriptions/${prescriptionId}/export/excel`, {
+      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+    })
+    if (!response.ok) throw new Error('Could not export Excel file.')
+    return response.blob()
+  },
+  exportJson: (prescriptionId: string) =>
+    request<Record<string, unknown>>(`/api/prescriptions/${prescriptionId}/export/json`),
 }

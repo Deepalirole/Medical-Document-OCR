@@ -91,7 +91,7 @@ class DynamicFieldMapper:
                     )
         if value in (None, "", []):
             if node.get("required"):
-                output.append(self._make_field(node, "", path, evidence, array_item_id))
+                output.append(self._make_field(node, value, path, evidence, array_item_id))
             return
         output.append(self._make_field(node, value, path, evidence, array_item_id))
 

@@ -8,7 +8,8 @@ import httpx
 
 from app.core.errors import AppError
 from app.services.llm.base import LLMExtraction
-from app.services.llm.prompt import SYSTEM_PROMPT, build_user_prompt
+from app.services.llm.prompt import build_user_prompt
+from app.services.llm.prompt_registry import get_prompt
 
 
 class OpenRouterProvider:
@@ -19,19 +20,35 @@ class OpenRouterProvider:
         timeout_seconds: int = 60,
         max_tokens: int = 4000,
         retries: int = 2,
+        prompt_version: str | None = None,
     ) -> None:
         self.api_key = api_key
         self.model = model
         self.timeout_seconds = timeout_seconds
         self.max_tokens = max_tokens
         self.retries = retries
+        self.prompt = get_prompt(prompt_version)
 
     @property
     def name(self) -> str:
         return "openrouter"
 
+    @property
+    def prompt_version(self) -> str:
+        return self.prompt.version
+
+    @property
+    def prompt_sha256(self) -> str:
+        return self.prompt.sha256
+
     def health(self) -> dict[str, str | bool]:
-        return {"provider": self.name, "configured": bool(self.api_key), "model": self.model}
+        return {
+            "provider": self.name,
+            "configured": bool(self.api_key),
+            "model": self.model,
+            "prompt_version": self.prompt_version,
+            "prompt_sha256": self.prompt_sha256,
+        }
 
     async def extract(
         self,
@@ -45,7 +62,7 @@ class OpenRouterProvider:
         body = {
             "model": self.model,
             "messages": [
-                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "system", "content": self.prompt.system_prompt},
                 {
                     "role": "user",
                     "content": build_user_prompt(raw_text, evidence, schema_definition),

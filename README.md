@@ -8,6 +8,33 @@ reviewer corrections, and approved output as separate, auditable stages.
 > substitute, or silently infer unsupported medical content. Only reviewer-approved versions are
 > eligible for downstream integration.
 
+## Application Screenshots
+
+### 1. Document Review & Interactive Verification
+Side-by-side verification interface showing the high-resolution prescription viewer, OCR extraction confidence scores, page section tags, and dynamic field editing.
+
+![Document Review & Interactive Verification](docs/images/01-document-review.png)
+
+### 2. Prescription Processing Queue
+Operational overview tracking total processed documents, items needing review, approved batches, and reviewer correction metrics.
+
+![Prescription Processing Queue](docs/images/02-prescriptions-queue.png)
+
+### 3. Canonical OCR Evidence Layer
+Immutable OCR text stream preserved per page with character counts, engine execution time, and confidence metrics for clinical audit compliance.
+
+![Canonical OCR Evidence Layer](docs/images/03-raw-ocr-evidence.png)
+
+### 4. Prescribed Medicines & Remedies Table
+Tabular extraction structure mapped to schemas with atomic evidence tracking, dosage/potency inputs, and dynamic row addition.
+
+![Prescribed Medicines & Remedies Table](docs/images/04-medicines-table.png)
+
+### 5. Structured JSON Export
+Direct JSON export and inspection modal displaying mapped fields ready for downstream HMIS / EMR consumption.
+
+![Structured JSON Export](docs/images/05-export-json.png)
+
 ## Architecture
 
 ```text
@@ -90,6 +117,19 @@ production Vite bundle plus dependency audit.
 - Operations: paginated prescriptions, organization metrics, admin diagnostics.
 - Integration: `/api/prescriptions/{id}/integration-payload` exports approved versions only; see
   [docs/INTEGRATION_CONTRACT.md](docs/INTEGRATION_CONTRACT.md).
+- HMIS/EMR (P4): `/api/integrations/hmis/health`, `/api/prescriptions/{id}/hmis-preview`, and
+  `/api/prescriptions/{id}/hmis-dispatch` push approved snapshots into the Medikunj schema;
+  `/api/integrations/emr/health` and `/api/prescriptions/{id}/emr-dispatch` do the same into a
+  FHIR R4 EMR. Both destinations are inert until `HMIS_PROVIDER` / `EMR_PROVIDER` are set.
+- Assistance (P4): `/api/prescriptions/{id}/schema-suggestions`,
+  `/api/prescriptions/{id}/medicine-suggestions`, `/api/assistance/medicines`, and
+  `/api/assistance/prompt-versions`. All are advisory and mutate nothing.
+- Approvals (P4): `/api/prescriptions/{id}/approval-status` and `.../approval-steps` drive the
+  multi-stage sign-off chain that gates the immutable approved version.
+- Background/realtime (P4): `POST|GET /api/prescriptions/{id}/process-async`,
+  `/api/prescriptions/{id}/progress-stream` (SSE), and `/api/admin/worker-pool`.
+- Feedback (P4): `/api/organizations/{id}/feedback-dataset` and `.jsonl` export approved-only
+  reviewer corrections for evaluation; admin-only and free of reviewer identity.
 
 `Idempotency-Key` is supported by the processing endpoint. Duplicate uploads are also protected by
 an organization/source SHA-256 constraint. Failed OCR can resume from persisted derived pages, and
@@ -97,35 +137,33 @@ failed LLM extraction leaves raw evidence plus null review fields available for 
 
 ## Extension points
 
-- OCR providers implement `OCREngine` and return canonical evidence.
+- OCR providers implement `OCREngine` and return canonical evidence. Tesseract (default),
+  PaddleOCR, Google Vision, and Azure Document Intelligence ship in-tree and are selected with
+  `OCR_PROVIDER`; PaddleOCR is an optional extra (`pip install -e ".[paddle]"`).
 - HTR providers implement `HTREngine`; an unconfigured provider returns `HTR_NOT_CONFIGURED`
-  without breaking printed OCR.
+  without breaking printed OCR. TrOCR ships in-tree behind `HTR_PROVIDER=trocr` and the
+  optional `trocr` extra.
+- Any `OCREngine`/`HTREngine` can be scored against a labelled corpus with
+  `python -m app.services.benchmark <dataset-dir>`, which reports CER, WER, latency, and
+  confidence calibration per provider.
+- Extraction prompts are immutable and versioned in `app.services.llm.prompt_registry`; every
+  extraction run records the prompt version and digest it ran under.
 - LLM providers implement `LLMProvider`; OpenRouter is the production adapter.
 - Dynamic schemas are data, not form code. Nested objects and arrays are handled by the mapper and
   the React dynamic renderer.
+- Medical Bill & Pharmacy Receipt Support: Dedicated extraction schemas for hospital invoices,
+  pharmacy cash memos, and medical bills with itemized medicine tables, batch/unique codes, unit prices,
+  quantities, discounts, and financial grand totals.
+- Dual Export (JSON & Excel): One-click export to structured JSON and formatted Microsoft Excel
+  (`.xlsx` / `.csv`) workbooks with styled provider, patient, and billing summary blocks.
 - Downstream destinations consume only immutable approved snapshots.
+- HMIS/EMR destinations implement `HMISConnector` and are selected by `HMIS_PROVIDER` /
+  `EMR_PROVIDER`; an unconfigured destination returns `HMIS_NOT_CONFIGURED` /
+  `EMR_NOT_CONFIGURED` while mapping and preview still work. Destination column mapping is data
+  (`MedikunjFieldMapping`), and the repeatable medicine section is located by schema type rather
+  than by field name.
+- Approval chains are data: a row in `approval_workflows` defines the stages. An organization
+  with no row keeps the original single reviewer sign-off.
 
 See [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) for verified progress and environment
 limitations.
-
-
-Outputs:-
-
-Document review
-<img width="1909" height="901" alt="Screenshot 2026-08-15 213017" src="https://github.com/user-attachments/assets/83eb6739-40ee-4214-a692-f96ba86bfa00" />
-
-
-Prescription Queue
-<img width="1906" height="903" alt="Screenshot 2026-08-15 213026" src="https://github.com/user-attachments/assets/b023b86c-de4a-453e-a60a-6737aa51ce1e" />
-
-
-Canonical OCR evidence
-<img width="1910" height="866" alt="Screenshot 2026-08-15 213040" src="https://github.com/user-attachments/assets/9a10d644-9068-4e36-a628-bfe5b0e20aed" />
-
-
-Prescribed medicines and remidies
-<img width="1787" height="691" alt="Screenshot 2026-08-15 213051" src="https://github.com/user-attachments/assets/d02ca790-7141-4ed7-ae09-73f9a90fc2e9" />
-
-
-Export structured JSON
-<img width="1787" height="691" alt="Screenshot 2026-08-15 213051" src="https://github.com/user-attachments/assets/e51d7749-53db-49bb-8452-d8e061ec935d" />

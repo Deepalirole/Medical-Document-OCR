@@ -1,0 +1,144 @@
+# Seed medicine dictionary for reviewer assistance.
+# One entry per line; blank lines and lines starting with '#' are ignored.
+# This list is deliberately small and generic. Extend or replace it for a deployment with
+# MEDICINE_DICTIONARY_PATH, which is merged on top of these entries.
+Acyclovir
+Albendazole
+Allopurinol
+Alprazolam
+Amikacin
+Amitriptyline
+Amlodipine
+Amoxicillin
+Amoxicillin Clavulanate
+Ampicillin
+Aspirin
+Atenolol
+Atorvastatin
+Augmentin
+Azithromycin
+Baclofen
+Betamethasone
+Budesonide
+Bisoprolol
+Calcium Carbonate
+Carbamazepine
+Cefixime
+Cefpodoxime
+Ceftriaxone
+Cefuroxime
+Cetirizine
+Chloroquine
+Chlorpheniramine
+Ciprofloxacin
+Clarithromycin
+Clindamycin
+Clobazam
+Clopidogrel
+Clotrimazole
+Codeine
+Colchicine
+Cyclophosphamide
+Dexamethasone
+Diclofenac
+Digoxin
+Diltiazem
+Domperidone
+Doxycycline
+Enalapril
+Escitalopram
+Esomeprazole
+Ethambutol
+Etoricoxib
+Famotidine
+Fexofenadine
+Fluconazole
+Fluoxetine
+Folic Acid
+Furosemide
+Gabapentin
+Glimepiride
+Gliclazide
+Griseofulvin
+Haloperidol
+Hydrochlorothiazide
+Hydroxychloroquine
+Ibuprofen
+Insulin Glargine
+Ipratropium
+Isoniazid
+Itraconazole
+Ivermectin
+Ketoconazole
+Ketorolac
+Labetalol
+Lactulose
+Lamotrigine
+Lansoprazole
+Levocetirizine
+Levofloxacin
+Levothyroxine
+Linezolid
+Lisinopril
+Loperamide
+Loratadine
+Losartan
+Meropenem
+Metformin
+Methotrexate
+Methylprednisolone
+Metoclopramide
+Metoprolol
+Metronidazole
+Montelukast
+Morphine
+Moxifloxacin
+Mupirocin
+Naproxen
+Nifedipine
+Nitrofurantoin
+Norfloxacin
+Olanzapine
+Omeprazole
+Ondansetron
+Oseltamivir
+Pantoprazole
+Paracetamol
+Paroxetine
+Phenytoin
+Piperacillin Tazobactam
+Prazosin
+Prednisolone
+Pregabalin
+Propranolol
+Pyrazinamide
+Rabeprazole
+Ramipril
+Ranitidine
+Rifampicin
+Risperidone
+Rosuvastatin
+Salbutamol
+Sertraline
+Silver Sulfadiazine
+Simvastatin
+Sitagliptin
+Sodium Valproate
+Spironolactone
+Sucralfate
+Sulfasalazine
+Tamsulosin
+Telmisartan
+Tenofovir
+Terbinafine
+Theophylline
+Tramadol
+Tranexamic Acid
+Trypsin Chymotrypsin
+Valacyclovir
+Vancomycin
+Verapamil
+Vitamin B Complex
+Vitamin D3
+Warfarin
+Zinc Sulfate

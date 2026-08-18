@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Response
 
 from app.core.auth import RepoDep
 from app.core.errors import AppError
@@ -11,6 +11,8 @@ from app.models.review import (
     FieldResponse,
     FieldsResponse,
 )
+from app.services.approvals.workflow import ApprovalWorkflow
+from app.services.export.excel import generate_excel_export
 from app.services.extraction.mapper import build_structured_json
 from app.services.schema.registry import SchemaRegistry
 from app.services.validation.dynamic import DynamicValidator
@@ -84,6 +86,7 @@ async def approve(prescription_id: UUID, repository: RepoDep) -> ApprovedVersion
     prescription, rows = await _prescription_and_fields(prescription_id, repository)
     if not rows:
         raise AppError("FIELDS_NOT_READY", "No reviewable fields exist.", 409)
+    await _assert_approval_stages_complete(prescription, prescription_id, repository)
     unresolved_or_null = [
         r for r in rows if r["review_status"] == "REVIEW_REQUIRED" or r["current_value"] is None
     ]
@@ -102,6 +105,29 @@ async def approve(prescription_id: UUID, repository: RepoDep) -> ApprovedVersion
     )
 
 
+async def _assert_approval_stages_complete(prescription, prescription_id: UUID, repository) -> None:
+    """Refuse to cut the immutable version while approval stages are outstanding."""
+    getter = getattr(repository, "approval_workflow", None)
+    if getter is None:
+        return
+    organization_id = UUID(str(prescription["organization_id"]))
+    workflow = ApprovalWorkflow.from_config(await getter(organization_id))
+    if not workflow.is_multi_stage:
+        return
+    steps = await repository.approval_steps(prescription_id)
+    progress = workflow.progress(steps)
+    if not progress.can_finalize:
+        raise AppError(
+            "APPROVAL_STAGES_INCOMPLETE",
+            "All approval stages must be signed off before the version is created.",
+            409,
+            {
+                "next_stage": progress.next_stage.key if progress.next_stage else None,
+                "completed_keys": progress.completed_keys,
+            },
+        )
+
+
 @router.get("/json", response_model=dict)
 async def final_json(prescription_id: UUID, repository: RepoDep) -> dict:
     prescription = await repository.prescription_for_user(prescription_id)
@@ -111,3 +137,30 @@ async def final_json(prescription_id: UUID, repository: RepoDep) -> dict:
     if not version:
         raise AppError("NOT_APPROVED", "No approved prescription version exists.", 409)
     return version["structured_json"]
+
+
+@router.get("/export/excel")
+async def export_excel(prescription_id: UUID, repository: RepoDep) -> Response:
+    prescription, rows = await _prescription_and_fields(prescription_id, repository)
+    version = await repository.approved_version(prescription_id)
+    structured = version["structured_json"] if version else build_structured_json(rows)
+    filename = prescription.get("original_filename", "medical_document").rsplit(".", 1)[0]
+    excel_bytes = generate_excel_export(
+        structured_json=structured,
+        document_name=prescription.get("original_filename", "Medical Document"),
+        document_id=str(prescription_id),
+    )
+    return Response(
+        content=excel_bytes,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}_export.xlsx"'},
+    )
+
+
+@router.get("/export/json")
+async def export_json(prescription_id: UUID, repository: RepoDep) -> dict:
+    prescription, rows = await _prescription_and_fields(prescription_id, repository)
+    version = await repository.approved_version(prescription_id)
+    structured = version["structured_json"] if version else build_structured_json(rows)
+    return structured
+
