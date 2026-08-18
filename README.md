@@ -40,6 +40,11 @@ Organization schema registry enabling live configuration and template switching 
 
 ![Dynamic Document & Bill Schema Registry](docs/images/06-schema-registry.png)
 
+### 7. Medical Bill & Pharmacy Receipt Extraction
+Interactive side-by-side review interface for medical bills and pharmacy invoices with section filtering (`provider`, `patient`, `medicines`, `billing summary`), mapped itemized pricing, and confidence ratings.
+
+![Medical Bill & Pharmacy Receipt Extraction](docs/images/07-medical-bill-review.png)
+
 ## Architecture
 
 ```text
